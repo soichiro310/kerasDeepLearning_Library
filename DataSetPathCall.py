@@ -59,6 +59,10 @@ class UCF101_PathCall(DataSetPathCall):
             ''
         ]
         self.setPath(pathlist)
+        self.__dataListPath = self.getHomeDir() + 'dataset/UCF101/data_file.csv'
+        
+    def getDataListPath(self):
+        return self.__dataListPath
         
             
 if __name__ == '__main__':
