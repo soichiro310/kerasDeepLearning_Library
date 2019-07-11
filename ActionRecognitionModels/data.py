@@ -9,7 +9,7 @@ import os.path
 import sys
 import operator
 import threading
-from processor import process_image
+from .processor import process_image
 from keras.utils import to_categorical
 
 class threadsafe_iterator:
