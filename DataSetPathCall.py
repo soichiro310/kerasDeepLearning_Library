@@ -59,11 +59,14 @@ class UCF101_PathCall(DataSetPathCall):
             ''
         ]
         self.setPath(pathlist)
-        self.__dataListPath = self.getHomeDir() + 'dataset/UCF101/data_file.csv'
+        self.__dataListPath = self.getHomeDir() + 'dataset/UCF101/tvl1_flow/data_list.csv'
+        self.__optFlowDir = self.getHomeDir() + 'dataset/UCF101/tvl1_flow'
         
     def getDataListPath(self):
         return self.__dataListPath
         
+    def getOptFlowDir(self):
+        return self.__optFlowDir
             
 if __name__ == '__main__':
     a = UCF101_PathCall()
