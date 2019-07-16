@@ -29,7 +29,8 @@ def threadsafe_generator(func):
     return gen
 
 class DataSet():
-    def __init__(self, num_of_snip=1, opt_flow_len=10, image_shape=(224, 224), original_image_shape=(341, 256), class_limit=None):
+    def __init__(self, num_of_snip=1, opt_flow_len=10, image_shape=(224, 224), original_image_shape=(341, 256),
+                 class_limit=None,opt_flow_path=os.path.join('/data', 'opt_flow'),data_path='./data_list.csv'):
         """Constructor.
         opt_flow_len = (int) the number of optical flow frames to consider
         class_limit = (int) number of classes to limit the data to.
@@ -40,10 +41,10 @@ class DataSet():
         self.class_limit = class_limit
         self.image_shape = image_shape
         self.original_image_shape = original_image_shape
-        self.opt_flow_path = os.path.join('/data', 'opt_flow')
+        self.opt_flow_path = opt_flow_path
 
         # Get the data.
-        self.data_list = self.get_data_list()
+        self.data_list = self.get_data_list(data_path)
 
         # Get the classes.
         self.classes = self.get_classes()
@@ -52,9 +53,9 @@ class DataSet():
         self.data_list = self.clean_data_list()
 
     @staticmethod
-    def get_data_list():
+    def get_data_list(data_path='./data_list.csv'):
         """Load our data list from file."""
-        with open('./data_list.csv', 'r') as fin:
+        with open(data_path, 'r') as fin:
             reader = csv.reader(fin)
             data_list = list(reader)
 
@@ -118,7 +119,10 @@ class DataSet():
         # Get the right dataset for the generator.
         train, test = self.split_train_test()
         data_list = train if train_test == 'train' else test
-
+        
+        print('print data_list')
+        print(data_list)
+        
         idx = 0
 
         print("\nCreating %s generator with %d samples.\n" % (train_test,
@@ -158,7 +162,10 @@ class DataSet():
         opt_flow_stack = []
         opt_flow_dir_x = os.path.join(self.opt_flow_path, 'u', row[2])
         opt_flow_dir_y = os.path.join(self.opt_flow_path, 'v', row[2])
-
+        #opt_flow_dir_x = self.opt_flow_path + '/u/' + str(row[2])
+        #opt_flow_dir_y = self.opt_flow_path + '/v/' + str(row[2])
+        print(opt_flow_dir_x)
+        
         # spatial parameters
         if train_test == 'train':
             if crop == 'random':
