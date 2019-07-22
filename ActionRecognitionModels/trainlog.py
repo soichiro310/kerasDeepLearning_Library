@@ -35,8 +35,12 @@ def printAccuracyList(training_log):
             top_5_accuracies.append(float(val_top_k_categorical_accuracy))
             cnn_benchmark.append(0.65)  # ridiculous
         
-        print(max(accuracies))
-        print(max(top_5_accuracies))
+        print('val_acc')
+        print(accuracies)
+        print('\ntop_5_acc')
+        print(top_5_accuracies)
+        print('\nmax_val_acc：', str(max(accuracies)))
+        print('top_5_acc：', str(max(top_5_accuracies)))
 
 if __name__ == '__main__':
     training_log = 'data/logs/mlp-training-1489455559.7089438.log'

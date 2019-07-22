@@ -120,9 +120,6 @@ class DataSet():
         train, test = self.split_train_test()
         data_list = train if train_test == 'train' else test
         
-        print('print data_list')
-        print(data_list)
-        
         idx = 0
 
         print("\nCreating %s generator with %d samples.\n" % (train_test,
@@ -130,9 +127,9 @@ class DataSet():
 
         while 1:
             idx += 1
-            print("Generator yielding batch No.%d" % idx)
-            if(train_test == 'test'):
-                print("Validating for job: %s" % name_str)
+            #print("Generator yielding batch No.%d" % idx)
+            #if(train_test == 'test'):
+            #    print("Validating for job: %s" % name_str)
             X, y = [], []
 
             # Generate batch_size samples.
@@ -162,15 +159,17 @@ class DataSet():
         opt_flow_stack = []
         opt_flow_dir_x = os.path.join(self.opt_flow_path, 'u', row[2])
         opt_flow_dir_y = os.path.join(self.opt_flow_path, 'v', row[2])
-        #opt_flow_dir_x = self.opt_flow_path + '/u/' + str(row[2])
-        #opt_flow_dir_y = self.opt_flow_path + '/v/' + str(row[2])
-        print(opt_flow_dir_x)
         
         # spatial parameters
         if train_test == 'train':
             if crop == 'random':
                 # crop at center and four corners randomly for training
-                left, top = random.choice([[0, 0], [0, self.original_image_shape[1] - self.image_shape[1]], [self.original_image_shape[0] - self.image_shape[0], 0], [self.original_image_shape[0] - self.image_shape[0], self.original_image_shape[1] - self.image_shape[1]], [int((self.original_image_shape[0] - self.image_shape[0]) * 0.5), int((self.original_image_shape[1] - self.image_shape[1]) * 0.5)]])
+                left, top = random.choice([[0, 0], [0, self.original_image_shape[1] - self.image_shape[1]],
+                                           [self.original_image_shape[0] - self.image_shape[0], 0], 
+                                           [self.original_image_shape[0] - self.image_shape[0], 
+                                            self.original_image_shape[1] - self.image_shape[1]], 
+                                           [int((self.original_image_shape[0] - self.image_shape[0]) * 0.5), 
+                                            int((self.original_image_shape[1] - self.image_shape[1]) * 0.5)]])
             else:
                 # random crop for training set
                 left = int((self.original_image_shape[0] - self.image_shape[0]) * random.random())
@@ -204,7 +203,7 @@ class DataSet():
             # horizontal components
             img = None # reset to be safe
             img = cv2.imread(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg', 0)
-            print(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg')
+            #print(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg')
             img = np.array(img)
             # mean substraction 
             img = img - np.mean(img)
@@ -217,6 +216,8 @@ class DataSet():
             img = img / 255. # normalize pixels 
             if flip:
                 img = -img
+            
+            img = cv2.resize(img, self.image_shape)
             opt_flow_stack.append(img)
 
             # vertical components
@@ -232,10 +233,14 @@ class DataSet():
             else:
                 #resize
                 img2 = cv2.resize(img2, self.image_shape)
-            img2 = img2 / 255. # normalize pixels 
+            img2 = img2 / 255. # normalize pixels
+            
+            img2 = cv2.resize(img2, self.image_shape)
             opt_flow_stack.append(img2)
-
+        
+        
         opt_flow_stack = np.array(opt_flow_stack)
+        
         opt_flow_stack = np.swapaxes(opt_flow_stack, 0, 1)
         opt_flow_stack = np.swapaxes(opt_flow_stack, 1, 2)
 
