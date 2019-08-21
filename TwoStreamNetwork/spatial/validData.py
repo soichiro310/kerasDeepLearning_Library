@@ -7,6 +7,7 @@ import os.path
 import random
 import threading
 from keras.utils import to_categorical
+from keras.preprocessing.image import ImageDataGenerator
 import cv2
 
 class DataSet():
@@ -102,7 +103,7 @@ class DataSet():
             else:
                 test.append(item)
         return train, test
-
+    
     def validation_generator(self):
         """Return a generator of optical frame stacks that we can use to test."""
 
@@ -110,12 +111,11 @@ class DataSet():
 
         idx = 0
         while 1:
-            idx += 1
             idx = idx % self.n_batch
-            print("\nGenerating batch number {0}/{1} ...".format(idx, self.n_batch))
+            print("\nGenerating batch number {0}/{1} ...".format(idx + 1, self.n_batch))
+            idx += 1
             
-            X_spatial_batch = []
-            X_temporal_batch = []
+            X_batch = []
             y_batch = []
 
             # Get a list of batch-size samples.
@@ -123,35 +123,27 @@ class DataSet():
 
             for row in batch_list:
                 # Get the stacked optical flows from disk.
-                X_spatial, X_temporal = self.get_static_frame_and_stacked_opt_flows(row)
+                X = self.get_static_frame(row)
                 
                 # Get the corresponding labels
                 y = self.get_class_one_hot(row[1])
                 y = np.array(y)
                 y = np.squeeze(y)
 
-                X_spatial_batch.append(X_spatial)
-                X_temporal_batch.append(X_temporal)
+                X_batch.append(X)
                 y_batch.append(y)
 
-            X_batch = [np.array(X_spatial_batch), np.array(X_temporal_batch)]
+            X_batch = np.array(X_batch)
             y_batch = np.array(y_batch)
 
             yield X_batch, y_batch
-            
-    def get_static_frame_and_stacked_opt_flows(self, row):
+
+    def get_static_frame(self, row):
         static_frames = []
-        opt_flow_stacks = []
 
         static_frame_dir = os.path.join(self.static_frame_path, row[1], row[2])
         opt_flow_dir_x = os.path.join(self.opt_flow_path, 'u', row[2])
         opt_flow_dir_y = os.path.join(self.opt_flow_path, 'v', row[2])
-
-        # spatial parameters (crop at center for validation)
-        left = int((self.original_image_shape[0] - self.image_shape[0]) * 0.5)
-        top = int((self.original_image_shape[1] - self.image_shape[1]) * 0.5)
-        right = left + self.image_shape[0]
-        bottom = top + self.image_shape[1]
 
         # temporal parameters
         total_frames = len(os.listdir(opt_flow_dir_x))
@@ -171,38 +163,9 @@ class DataSet():
 
             # Get the static frame
             static_frame = cv2.imread(static_frame_dir + '-%04d' % start_frame + '.jpg')
-            static_frame = static_frame / 255.0
+            static_frame = static_frame * 1.0 / 255.0
             static_frame = cv2.resize(static_frame, self.image_shape)
 
             static_frames.append(static_frame)
 
-            # Get the optical flow stack
-            frames = range(start_frame, start_frame + self.opt_flow_len) # selected optical flow frames
-            opt_flow_stack = []
-            # loop over frames
-            for i_frame in frames:
-                # horizontal components
-                img = None # reset to be safe
-                img = cv2.imread(opt_flow_dir_x + '/frame' + "%06d"%i_frame + '.jpg', 0)
-                img = np.array(img)
-                img = img - np.mean(img) # mean substraction
-                img = img[top: bottom, left: right]
-                img = img / 255.0 # normalize pixels 
-                img = cv2.resize(img, self.image_shape)
-                opt_flow_stack.append(img)
-    
-                # vertical components
-                img2 = None # reset to be safe
-                img2 = cv2.imread(opt_flow_dir_y + '/frame' + "%06d"%i_frame + '.jpg', 0)
-                img2 = np.array(img2)
-                img2 = img2 - np.mean(img2) # mean substraction
-                img2 = img2[top: bottom, left: right]
-                img2 = img2 / 255.0 # normalize pixels 
-                img2 = cv2.resize(img2, self.image_shape)
-                opt_flow_stack.append(img2)
-
-            opt_flow_stack = np.array(opt_flow_stack)
-            opt_flow_stack = np.swapaxes(opt_flow_stack, 0, 2)
-            opt_flow_stacks.append(opt_flow_stack)
-
-        return np.array(static_frames), np.array(opt_flow_stacks)
+        return np.array(static_frames)
