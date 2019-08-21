@@ -3,7 +3,8 @@ import pprint
 
 class DataSetPathCall():
     def __init__(self, pathlist=['','','','']):
-        self.__homeDir = os.path.expanduser("~") + '/'
+        #self.__homeDir = os.path.expanduser("~") + '/'
+        self.__homeDir = '/db/s-sato/'
         self.__frameDir = pathlist[0]
         self.__trainDir = pathlist[0] + pathlist[1]
         self.__testDir = pathlist[0] + pathlist[2]
