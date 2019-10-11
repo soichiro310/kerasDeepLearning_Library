@@ -68,7 +68,7 @@ class UCF101_PathCall(DataSetPathCall):
         
     def getOptFlowDir(self):
         return self.__optFlowDir
-            
+
 if __name__ == '__main__':
     a = UCF101_PathCall()
     a.printPathList()
