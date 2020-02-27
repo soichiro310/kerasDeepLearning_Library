@@ -213,7 +213,7 @@ def conv3d_bn(x,
     return x
 
 
-def I3D(input_shape=(20,224,224,3),nb_class=1):
+def I3D(input_shape=(20,224,224,3),nb_class=1, name='I3D'):
 
     # Determine proper input shape
     input_shape = _obtain_input_shape(
@@ -411,13 +411,10 @@ def I3D(input_shape=(20,224,224,3),nb_class=1):
     x = AveragePooling3D((2, h, w), strides=(1, 1, 1), padding='valid', name='global_avg_pool')(x)
     #x = conv3d_bn(x, classes, 1, 1, 1, padding='same', name='Conv3d_6a_1x1_1')
     
-   
-    share_layer = Network(img_input, x, name='I3D')
-    
     # create model
     #model = Model([input1, input2], [output1, output2], name='i3d_inception')
 
-    return Network(img_input, x, name='I3D')
+    return Network(img_input, x, name=name)
 
 def sampleEvaluate(pred):
     LABEL_MAP_PATH = '/home/s-sato/notebook/library/I3D/label_map.txt'
